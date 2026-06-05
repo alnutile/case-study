@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 
 from fastapi import Header, HTTPException, Path
 
@@ -31,8 +32,17 @@ def _load_keys() -> dict[str, str]:
         return dict(DEFAULT_KEYS)
     try:
         parsed = json.loads(raw)
-    except json.JSONDecodeError as exc:
-        raise RuntimeError('KORRAL_KEYS must be JSON: {"<key>": "<store_id>"}') from exc
+    except json.JSONDecodeError:
+        # A bad value must never crash boot — fall back to built-in demo keys.
+        print("WARN: KORRAL_KEYS is not valid JSON; using built-in demo keys", file=sys.stderr)
+        return dict(DEFAULT_KEYS)
+    if not isinstance(parsed, dict):
+        print(
+            'WARN: KORRAL_KEYS must be a JSON object like {"<key>": "<store_id>"}; '
+            "using built-in demo keys",
+            file=sys.stderr,
+        )
+        return dict(DEFAULT_KEYS)
     return {str(k): str(v) for k, v in parsed.items()}
 
 
