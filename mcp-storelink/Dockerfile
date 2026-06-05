@@ -18,9 +18,10 @@ COPY package.json package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 COPY --from=build /app/dist ./dist
 
-# Audit DB lives on a volume mounted inside Korral's tenancy.
+# Audit DB dir. On Railway, attach a Railway Volume here for persistence; in
+# Korral's GCP this is a mounted volume inside the tenancy. (No Docker VOLUME
+# instruction — Railway rejects it.)
 RUN mkdir -p /app/data && chown -R node:node /app/data
-VOLUME ["/app/data"]
 
 # Note: no MCP_HTTP_PORT here — the app binds $PORT when the platform injects it
 # (Railway/Cloud Run), else falls back to 8080.
