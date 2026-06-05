@@ -40,6 +40,39 @@ async function main(): Promise<void> {
       res.end(JSON.stringify({ status: "ok", provisioned_stores: ctx.secrets.provisionedStores() }));
       return;
     }
+
+    // Read-only ops view for the FDE debug dashboard (Step 3, reader A).
+    // No secrets are exposed — keys appear only as fingerprints in the audit rows.
+    // Optionally gate with DEBUG_TOKEN (Bearer); left open in the demo.
+    if (req.url?.startsWith("/api/debug")) {
+      const token = process.env.DEBUG_TOKEN;
+      if (token && req.headers.authorization !== `Bearer ${token}`) {
+        res.writeHead(401, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "unauthorized" }));
+        return;
+      }
+      const t0 = Date.now();
+      let upstream: { ok: boolean; latency_ms: number } = { ok: false, latency_ms: 0 };
+      try {
+        const r = await fetch(new URL("/healthz", ctx.cfg.storelinkBaseUrl), { signal: AbortSignal.timeout(4000) });
+        upstream = { ok: r.ok, latency_ms: Date.now() - t0 };
+      } catch {
+        upstream = { ok: false, latency_ms: Date.now() - t0 };
+      }
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(
+        JSON.stringify({
+          server: { name: "mcp-storelink", version: "1.0.0" },
+          env: process.env.RAILWAY_ENVIRONMENT_NAME ?? process.env.NODE_ENV ?? "local",
+          storelink_base_url: ctx.cfg.storelinkBaseUrl,
+          provisioned_stores: ctx.secrets.provisionedStores(),
+          upstream,
+          traces: ctx.audit.recent({ limit: 100 }),
+        }),
+      );
+      return;
+    }
+
     if (req.method !== "POST" || !req.url?.startsWith("/mcp")) {
       res.writeHead(404).end();
       return;

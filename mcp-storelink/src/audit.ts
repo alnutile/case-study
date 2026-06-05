@@ -41,6 +41,7 @@ export interface AuditEntry {
   outcome: "ok" | "error";
   error_code?: string;
   key_fingerprint?: string;
+  duration_ms?: number; // end-to-end tool latency, for the FDE debug view
 }
 
 export interface AuditRow extends AuditEntry {
@@ -74,10 +75,17 @@ export class AuditStore {
         reason          TEXT,
         outcome         TEXT NOT NULL,
         error_code      TEXT,
-        key_fingerprint TEXT
+        key_fingerprint TEXT,
+        duration_ms     INTEGER
       );
       CREATE INDEX IF NOT EXISTS idx_audit_store ON audit_log(store_id, ts);
     `);
+    // Back-compat: add the column to a DB created before duration_ms existed.
+    try {
+      this.db.exec(`ALTER TABLE audit_log ADD COLUMN duration_ms INTEGER`);
+    } catch {
+      /* column already exists */
+    }
   }
 
   record(entry: AuditEntry): void {
@@ -85,9 +93,9 @@ export class AuditStore {
       INSERT INTO audit_log (
         ts, request_id, actor, tool, store_id, sku, on_hand, pos_units,
         window_hours, gap, threshold, decision, order_id, quantity, reason,
-        outcome, error_code, key_fingerprint
+        outcome, error_code, key_fingerprint, duration_ms
       ) VALUES (
-        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
       )
     `);
     stmt.run(
@@ -109,6 +117,7 @@ export class AuditStore {
       entry.outcome,
       entry.error_code ?? null,
       entry.key_fingerprint ?? null,
+      entry.duration_ms ?? null,
     );
   }
 

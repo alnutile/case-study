@@ -61,18 +61,22 @@ export function buildServer(ctx: AppContext): McpServer {
       const started = Date.now();
       try {
         const { result, audit } = await fn(args, requestId);
-        ctx.audit.record({ request_id: requestId, actor: ACTOR, tool, outcome: "ok", ...audit });
+        const duration_ms = Date.now() - started;
+        const key_fingerprint = audit.store_id ? SecretStore.fingerprint(ctx.secrets.getKey(audit.store_id)) : undefined;
+        ctx.audit.record({ request_id: requestId, actor: ACTOR, tool, outcome: "ok", duration_ms, key_fingerprint, ...audit });
         log.info("tool.ok", {
           request_id: requestId,
           tool,
           store_id: audit.store_id,
           sku: audit.sku,
-          duration_ms: Date.now() - started,
+          duration_ms,
           outcome: "ok",
         });
         return result;
       } catch (e) {
+        const duration_ms = Date.now() - started;
         const { code, message, store_id } = classify(e);
+        const key_fingerprint = store_id ? SecretStore.fingerprint(ctx.secrets.getKey(store_id)) : undefined;
         ctx.audit.record({
           request_id: requestId,
           actor: ACTOR,
@@ -82,12 +86,14 @@ export function buildServer(ctx: AppContext): McpServer {
           outcome: "error",
           error_code: code,
           reason: message,
+          duration_ms,
+          key_fingerprint,
         });
         log.error("tool.error", {
           request_id: requestId,
           tool,
           store_id,
-          duration_ms: Date.now() - started,
+          duration_ms,
           outcome: "error",
           error_code: code,
         });

@@ -17,7 +17,7 @@
   .wrap { max-width: 1400px; margin: 0 auto; padding: 16px; }
 
   .topbar { background: #111827; color: #e5e7eb; border-radius: 8px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-  .topbar .left { display: flex; gap: 22px; align-items: center; }
+  .topbar .left { display: flex; gap: 22px; align-items: center; flex-wrap: wrap; }
   .topbar .item { font-size: 12px; }
   .topbar .item .label { color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px; }
   .topbar .item .value { font-weight: 600; font-size: 13px; margin-top: 2px; }
@@ -58,14 +58,8 @@
   .lat-slow { color: #d97706; }
   .lat-bad { color: #dc2626; font-weight: 600; }
 
-  .filters { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
-  .filter { padding: 4px 10px; border-radius: 6px; border: 1px solid #e5e7eb; background: #fff; font-size: 11px; cursor: pointer; color: #374151; }
-  .filter.active { background: #111827; color: #fff; border-color: #111827; }
-
   .errors { display: flex; flex-direction: column; gap: 8px; max-height: 360px; overflow-y: auto; }
-  .err {
-    padding: 10px; border-radius: 6px; background: #fef2f2; border-left: 3px solid #ef4444;
-  }
+  .err { padding: 10px; border-radius: 6px; background: #fef2f2; border-left: 3px solid #ef4444; }
   .err.warn { background: #fffbeb; border-left-color: #f59e0b; }
   .err .head { display: flex; justify-content: space-between; align-items: baseline; }
   .err .head .title { font-weight: 600; font-size: 12px; color: #991b1b; }
@@ -73,19 +67,11 @@
   .err .time { color: #9ca3af; font-size: 10px; }
   .err .msg { font-family: ui-monospace, monospace; font-size: 11px; color: #374151; margin-top: 4px; }
   .err .ctx { color: #6b7280; font-size: 11px; margin-top: 4px; }
-  .err .actions { margin-top: 6px; display: flex; gap: 6px; }
-  .err .btn { font-size: 10px; padding: 2px 8px; border-radius: 4px; background: #fff; border: 1px solid #e5e7eb; cursor: pointer; color: #374151; }
 
   .secrets-table td { font-size: 12px; }
-  .age-fresh { color: #059669; }
-  .age-stale { color: #d97706; }
-  .age-old { color: #dc2626; font-weight: 600; }
 
   .row-flex { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
-
-  details { margin-top: 4px; }
-  details summary { cursor: pointer; color: #6366f1; font-size: 11px; }
-  details pre { background: #f9fafb; padding: 8px; border-radius: 4px; font-size: 11px; margin: 4px 0 0 0; overflow-x: auto; border: 1px solid #e5e7eb; }
+  .muted { color: #9ca3af; font-size: 11px; }
 
   @media (max-width: 1000px) {
     .strip { grid-template-columns: repeat(3, 1fr); }
@@ -101,282 +87,87 @@
     <div class="left">
       <div class="item">
         <div class="label">MCP server</div>
-        <div class="value mono"><span class="dot dot-green"></span>storelink-mcp v0.4.2</div>
-      </div>
-      <div class="item">
-        <div class="label">Deploy</div>
-        <div class="value mono">11h ago &middot; ci#284</div>
+        <div class="value mono"><span class="dot dot-green" id="mcp-dot"></span><span id="mcp-name">storelink-mcp</span></div>
       </div>
       <div class="item">
         <div class="label">Env</div>
-        <div class="value mono">korral-prod-gcp</div>
+        <div class="value mono" id="env">&hellip;</div>
       </div>
       <div class="item">
         <div class="label">Upstream StoreLink</div>
-        <div class="value"><span class="dot dot-green"></span>OK &middot; p95 184ms</div>
+        <div class="value"><span class="dot dot-green" id="up-dot"></span><span id="up-status">&hellip;</span></div>
       </div>
       <div class="item">
-        <div class="label">On-call</div>
-        <div class="value">alfred.nutile@duvo</div>
+        <div class="label">Stores with creds</div>
+        <div class="value" id="prov">&hellip;</div>
+      </div>
+      <div class="item">
+        <div class="label">Last activity</div>
+        <div class="value mono" id="last-activity">&hellip;</div>
       </div>
     </div>
     <div>
-      <span class="pill pill-pend mono">trace_id: tr_8a4f...c12</span>
+      <button class="pill pill-pend mono" style="border:none;cursor:pointer" onclick="load()">refresh</button>
     </div>
   </div>
 
   <div class="strip">
-    <div class="stat good">
-      <div class="label">Requests (1h)</div>
-      <div class="value">3,184</div>
-      <div class="sub">+12% vs prior</div>
-    </div>
-    <div class="stat">
-      <div class="label">Tool calls</div>
-      <div class="value">11,407</div>
-      <div class="sub">3.6 per request</div>
-    </div>
-    <div class="stat bad">
-      <div class="label">Errors (1h)</div>
-      <div class="value">17</div>
-      <div class="sub">0.53% &middot; 11 unique</div>
-    </div>
-    <div class="stat warn">
-      <div class="label">p95 latency</div>
-      <div class="value">412ms</div>
-      <div class="sub">+91ms since deploy</div>
-    </div>
-    <div class="stat">
-      <div class="label">Stores with creds</div>
-      <div class="value">178 / 180</div>
-      <div class="sub">2 missing keys</div>
-    </div>
-    <div class="stat warn">
-      <div class="label">Keys aging out</div>
-      <div class="value">6</div>
-      <div class="sub">rotate &lt; 24h</div>
-    </div>
+    <div class="stat"><div class="label">Tool calls</div><div class="value" id="s-calls">&ndash;</div><div class="sub" id="s-tools">&nbsp;</div></div>
+    <div class="stat bad"><div class="label">Errors</div><div class="value" id="s-errors">&ndash;</div><div class="sub" id="s-errrate">&nbsp;</div></div>
+    <div class="stat good"><div class="label">p50 latency</div><div class="value" id="s-p50">&ndash;</div><div class="sub">median tool call</div></div>
+    <div class="stat warn"><div class="label">p95 latency</div><div class="value" id="s-p95">&ndash;</div><div class="sub" id="s-max">&nbsp;</div></div>
+    <div class="stat"><div class="label">Upstream latency</div><div class="value" id="s-up">&ndash;</div><div class="sub">StoreLink /healthz</div></div>
+    <div class="stat"><div class="label">Provisioned stores</div><div class="value" id="s-prov">&ndash;</div><div class="sub">have a live key</div></div>
   </div>
 
   <div class="grid">
     <div class="card">
-      <h2>Recent agent invocations <span class="meta">live tail &middot; click row for full trace</span></h2>
-      <div class="filters">
-        <button class="filter active">All</button>
-        <button class="filter">Errors only</button>
-        <button class="filter">Slow (&gt;1s)</button>
-        <button class="filter">Store 47</button>
-        <button class="filter">get_inventory</button>
-        <button class="filter">raise_replenishment</button>
-      </div>
+      <h2>Recent agent invocations <span class="meta">live tail &middot; newest first</span></h2>
       <table>
         <thead>
           <tr>
             <th>Time</th>
-            <th>Trace</th>
+            <th>Request</th>
             <th>Tool</th>
             <th>Store / SKU</th>
             <th>Lat</th>
             <th>Status</th>
-            <th>Tokens</th>
           </tr>
         </thead>
-        <tbody>
-          <tr>
-            <td class="mono">22:47:11</td>
-            <td class="mono">tr_8a4f...c12</td>
-            <td class="mono">raise_replenishment</td>
-            <td>47 &middot; 8847291</td>
-            <td class="lat lat-fast">218ms</td>
-            <td><span class="pill pill-ok">200</span></td>
-            <td class="mono">412</td>
-          </tr>
-          <tr>
-            <td class="mono">22:47:09</td>
-            <td class="mono">tr_8a4f...c12</td>
-            <td class="mono">get_pos_recent</td>
-            <td>47 &middot; 8847291</td>
-            <td class="lat lat-fast">142ms</td>
-            <td><span class="pill pill-ok">200</span></td>
-            <td class="mono">88</td>
-          </tr>
-          <tr>
-            <td class="mono">22:47:08</td>
-            <td class="mono">tr_8a4f...c12</td>
-            <td class="mono">get_inventory</td>
-            <td>47 &middot; 8847291</td>
-            <td class="lat lat-fast">98ms</td>
-            <td><span class="pill pill-ok">200</span></td>
-            <td class="mono">54</td>
-          </tr>
-          <tr style="background: #fef2f2;">
-            <td class="mono">22:46:54</td>
-            <td class="mono">tr_91b2...704</td>
-            <td class="mono">get_inventory</td>
-            <td>73 &middot; 8847102</td>
-            <td class="lat lat-bad">5,011ms</td>
-            <td><span class="pill pill-err">504</span></td>
-            <td class="mono">0</td>
-          </tr>
-          <tr style="background: #fef2f2;">
-            <td class="mono">22:46:31</td>
-            <td class="mono">tr_77e3...a18</td>
-            <td class="mono">raise_replenishment</td>
-            <td>14 &middot; 8847055</td>
-            <td class="lat lat-slow">1,204ms</td>
-            <td><span class="pill pill-err">401</span></td>
-            <td class="mono">0</td>
-          </tr>
-          <tr>
-            <td class="mono">22:46:18</td>
-            <td class="mono">tr_2c8d...331</td>
-            <td class="mono">get_inventory</td>
-            <td>102 &middot; 8847291</td>
-            <td class="lat lat-fast">104ms</td>
-            <td><span class="pill pill-ok">200</span></td>
-            <td class="mono">54</td>
-          </tr>
-          <tr>
-            <td class="mono">22:46:02</td>
-            <td class="mono">tr_2c8d...331</td>
-            <td class="mono">get_pos_recent</td>
-            <td>102 &middot; 8847291</td>
-            <td class="lat lat-fast">187ms</td>
-            <td><span class="pill pill-ok">200</span></td>
-            <td class="mono">92</td>
-          </tr>
-          <tr>
-            <td class="mono">22:45:48</td>
-            <td class="mono">tr_44a1...bcd</td>
-            <td class="mono">get_sku</td>
-            <td>&mdash; &middot; 8847301</td>
-            <td class="lat lat-fast">61ms</td>
-            <td><span class="pill pill-ok">200</span></td>
-            <td class="mono">31</td>
-          </tr>
-          <tr style="background: #fffbeb;">
-            <td class="mono">22:45:22</td>
-            <td class="mono">tr_60f7...e22</td>
-            <td class="mono">raise_replenishment</td>
-            <td>91 &middot; 8847055</td>
-            <td class="lat lat-fast">203ms</td>
-            <td><span class="pill pill-warn">held</span></td>
-            <td class="mono">218</td>
-          </tr>
-          <tr>
-            <td class="mono">22:45:01</td>
-            <td class="mono">tr_5b2a...8e1</td>
-            <td class="mono">list_stores</td>
-            <td>&mdash;</td>
-            <td class="lat lat-fast">42ms</td>
-            <td><span class="pill pill-ok">200</span></td>
-            <td class="mono">1,204</td>
-          </tr>
+        <tbody id="invocations">
+          <tr><td colspan="6" class="muted">Loading&hellip;</td></tr>
         </tbody>
       </table>
+      <div class="muted" id="updated" style="margin-top:8px"></div>
     </div>
 
     <div class="card">
-      <h2>Errors &amp; warnings <span class="meta">last 1h</span></h2>
-      <div class="errors">
-        <div class="err">
-          <div class="head">
-            <span class="title">Upstream timeout &middot; store 73</span>
-            <span class="time">22:46:54</span>
-          </div>
-          <div class="msg">UpstreamError: storelink GET /v1/stores/73/inventory timed out after 5000ms</div>
-          <div class="ctx">tool: get_inventory &middot; trace tr_91b2...704 &middot; 3rd timeout for store 73 this hour</div>
-          <div class="actions">
-            <button class="btn">Open trace</button>
-            <button class="btn">Ping #korral-ops</button>
-            <button class="btn">Mute 1h</button>
-          </div>
-        </div>
-        <div class="err">
-          <div class="head">
-            <span class="title">Auth rejected &middot; store 14</span>
-            <span class="time">22:46:31</span>
-          </div>
-          <div class="msg">StoreLink 401: X-Korral-Store-Key rejected. Key fingerprint: a3:1f:...:c7 (loaded 8d ago)</div>
-          <div class="ctx">Likely rotated by Korral IT. Reload from Secret Manager and retry.</div>
-          <div class="actions">
-            <button class="btn">Reload secret</button>
-            <button class="btn">Open trace</button>
-          </div>
-        </div>
-        <div class="err warn">
-          <div class="head">
-            <span class="title">Order held for buyer review &middot; store 91</span>
-            <span class="time">22:45:22</span>
-          </div>
-          <div class="msg">Supplier end-of-life flag set, agent declined to auto-approve.</div>
-          <div class="ctx">Expected behavior, surfaced for visibility.</div>
-        </div>
-        <div class="err warn">
-          <div class="head">
-            <span class="title">Schema drift &middot; supplier payload</span>
-            <span class="time">22:39:08</span>
-          </div>
-          <div class="msg">/v1/suppliers/4421 returned unknown field "lead_time_calendar_days" (expected "lead_time_days")</div>
-          <div class="ctx">Tolerated for now (extra field ignored), but worth confirming with Korral IT.</div>
-        </div>
+      <h2>Errors &amp; warnings <span class="meta">recent</span></h2>
+      <div class="errors" id="errors">
+        <div class="muted">Loading&hellip;</div>
       </div>
     </div>
   </div>
 
   <div class="row-flex">
     <div class="card">
-      <h2>Latency <span class="meta">last 60 min &middot; p50 / p95 / p99</span></h2>
+      <h2>Tool-call latency <span class="meta">recent calls (ms)</span></h2>
       <canvas id="latency" height="120"></canvas>
     </div>
     <div class="card">
-      <h2>Secret rotation &middot; stores needing attention <span class="meta">per-store key age</span></h2>
+      <h2>Per-store credentials <span class="meta">provisioned keys &amp; last use</span></h2>
       <table class="secrets-table">
         <thead>
           <tr>
             <th>Store</th>
-            <th>Key age</th>
-            <th>Last verified</th>
+            <th>Key fingerprint</th>
+            <th>Calls</th>
+            <th>Last seen</th>
             <th>Status</th>
-            <th></th>
           </tr>
         </thead>
-        <tbody>
-          <tr>
-            <td><strong>14</strong> &middot; Liberec</td>
-            <td class="age-old mono">8d 4h</td>
-            <td class="mono">8d ago</td>
-            <td><span class="pill pill-err">Rejected</span></td>
-            <td><button class="btn" style="font-size:10px;padding:3px 8px;">Reload</button></td>
-          </tr>
-          <tr>
-            <td><strong>62</strong> &middot; Hradec</td>
-            <td class="age-old mono">7d 22h</td>
-            <td class="mono">1h ago</td>
-            <td><span class="pill pill-warn">Expiring</span></td>
-            <td><button class="btn" style="font-size:10px;padding:3px 8px;">Reload</button></td>
-          </tr>
-          <tr>
-            <td><strong>118</strong> &middot; Olomouc</td>
-            <td class="age-stale mono">6d 11h</td>
-            <td class="mono">14m ago</td>
-            <td><span class="pill pill-warn">Watch</span></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td><strong>171</strong> &middot; Pardubice</td>
-            <td class="mono">&mdash;</td>
-            <td class="mono">never</td>
-            <td><span class="pill pill-gray">No credentials</span></td>
-            <td><button class="btn" style="font-size:10px;padding:3px 8px;">Provision</button></td>
-          </tr>
-          <tr>
-            <td><strong>179</strong> &middot; Decin</td>
-            <td class="mono">&mdash;</td>
-            <td class="mono">never</td>
-            <td><span class="pill pill-gray">No credentials</span></td>
-            <td><button class="btn" style="font-size:10px;padding:3px 8px;">Provision</button></td>
-          </tr>
+        <tbody id="secrets">
+          <tr><td colspan="5" class="muted">Loading&hellip;</td></tr>
         </tbody>
       </table>
     </div>
@@ -384,29 +175,115 @@
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js"></script>
 <script>
-  const labels = Array.from({length: 12}, (_, i) => `${(60 - i*5)}m`).reverse();
-  const ctx = document.getElementById('latency');
-  new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        { label: 'p50', data: [88, 92, 90, 94, 91, 96, 99, 102, 105, 110, 114, 119], borderColor: '#059669', backgroundColor: 'transparent', tension: 0.3, pointRadius: 0 },
-        { label: 'p95', data: [221, 234, 228, 241, 256, 287, 312, 344, 378, 391, 402, 412], borderColor: '#d97706', backgroundColor: 'transparent', tension: 0.3, pointRadius: 0 },
-        { label: 'p99', data: [521, 544, 538, 581, 624, 712, 814, 932, 1041, 1188, 1342, 1402], borderColor: '#dc2626', backgroundColor: 'transparent', tension: 0.3, pointRadius: 0 }
-      ]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } } },
-      scales: {
-        x: { grid: { display: false }, ticks: { font: { size: 10 } } },
-        y: { beginAtZero: true, grid: { color: '#f3f4f6' }, ticks: { font: { size: 10 }, callback: v => v + 'ms' } }
-      }
+  let latChart;
+  const hms = (iso) => iso ? new Date(iso).toISOString().slice(11, 19) : '—';
+  const latClass = (ms) => ms == null ? '' : (ms > 1000 ? 'lat-bad' : (ms > 400 ? 'lat-slow' : 'lat-fast'));
+
+  async function load() {
+    let d;
+    try { d = await (await fetch('/api/overview', { cache: 'no-store' })).json(); }
+    catch (e) { document.getElementById('env').textContent = 'fetch failed'; return; }
+
+    if (d.error) {
+      document.getElementById('mcp-name').textContent = 'MCP unreachable';
+      document.getElementById('mcp-dot').className = 'dot dot-red';
+      document.getElementById('env').textContent = d.mcp || '';
+      return;
     }
-  });
+
+    // Topbar
+    document.getElementById('mcp-name').textContent = `${d.server?.name ?? 'mcp'} ${d.server?.version ?? ''}`;
+    document.getElementById('env').textContent = d.env ?? '—';
+    const up = d.upstream ?? {};
+    document.getElementById('up-dot').className = 'dot ' + (up.ok ? 'dot-green' : 'dot-red');
+    document.getElementById('up-status').textContent = (up.ok ? 'OK' : 'DOWN') + (up.latency_ms != null ? ` · ${up.latency_ms}ms` : '');
+    document.getElementById('prov').textContent = `${d.stats.provisioned}`;
+    document.getElementById('last-activity').textContent = hms(d.stats.last_activity);
+
+    // Stat strip
+    const s = d.stats;
+    document.getElementById('s-calls').textContent = s.tool_calls;
+    document.getElementById('s-tools').textContent = `${s.tools} distinct tools`;
+    document.getElementById('s-errors').textContent = s.errors;
+    document.getElementById('s-errrate').textContent = `${s.error_rate}% of calls`;
+    document.getElementById('s-p50').textContent = s.p50_ms != null ? s.p50_ms + 'ms' : '—';
+    document.getElementById('s-p95').textContent = s.p95_ms != null ? s.p95_ms + 'ms' : '—';
+    document.getElementById('s-max').textContent = s.max_ms != null ? `max ${s.max_ms}ms` : ' ';
+    document.getElementById('s-up').textContent = up.latency_ms != null ? up.latency_ms + 'ms' : '—';
+    document.getElementById('s-prov').textContent = s.provisioned;
+
+    // Invocations
+    const inv = document.getElementById('invocations');
+    inv.innerHTML = '';
+    for (const t of d.invocations) {
+      const isErr = t.outcome === 'error';
+      const storeSku = `${t.store_id ?? '—'}${t.sku ? ' · ' + t.sku : ''}`;
+      const status = isErr ? `<span class="pill pill-err">${t.error_code ?? 'error'}</span>` : `<span class="pill pill-ok">ok</span>`;
+      inv.insertAdjacentHTML('beforeend', `<tr${isErr ? ' style="background:#fef2f2"' : ''}>
+        <td class="mono">${hms(t.ts)}</td>
+        <td class="mono">${(t.request_id ?? '').slice(0, 12)}</td>
+        <td class="mono">${t.tool ?? ''}</td>
+        <td>${storeSku}</td>
+        <td class="lat ${latClass(t.duration_ms)}">${t.duration_ms != null ? t.duration_ms + 'ms' : '—'}</td>
+        <td>${status}</td></tr>`);
+    }
+    if (!inv.children.length) inv.innerHTML = '<tr><td colspan="6" class="muted">No invocations yet — run the agent against this MCP.</td></tr>';
+
+    // Errors
+    const errs = document.getElementById('errors');
+    errs.innerHTML = '';
+    for (const e of d.errors) {
+      errs.insertAdjacentHTML('beforeend', `<div class="err">
+        <div class="head"><span class="title">${e.error_code ?? 'error'} · ${e.tool ?? ''}${e.store_id ? ' · store ' + e.store_id : ''}</span><span class="time">${hms(e.ts)}</span></div>
+        <div class="msg">${(e.reason ?? '').replace(/</g, '&lt;')}</div>
+        <div class="ctx">request ${e.request_id ?? ''} · ${e.duration_ms != null ? e.duration_ms + 'ms' : ''}</div>
+      </div>`);
+    }
+    if (!errs.children.length) errs.innerHTML = '<div class="muted">No errors in the recent window. 🎉</div>';
+
+    // Secrets / per-store
+    const sec = document.getElementById('secrets');
+    sec.innerHTML = '';
+    for (const st of d.stores) {
+      const ok = st.last_outcome !== 'error';
+      const pill = st.last_seen ? (ok ? '<span class="pill pill-ok">OK</span>' : '<span class="pill pill-err">Last error</span>') : '<span class="pill pill-gray">Idle</span>';
+      sec.insertAdjacentHTML('beforeend', `<tr>
+        <td><strong>${st.store_id}</strong></td>
+        <td class="mono">${st.fingerprint ?? '—'}</td>
+        <td>${st.calls}</td>
+        <td class="mono">${hms(st.last_seen)}</td>
+        <td>${pill}</td></tr>`);
+    }
+    if (!sec.children.length) sec.innerHTML = '<tr><td colspan="5" class="muted">No provisioned stores.</td></tr>';
+
+    // Latency chart (real, chronological)
+    const chrono = [...d.invocations].reverse();
+    const labels = chrono.map((t) => hms(t.ts));
+    const data = chrono.map((t) => t.duration_ms ?? 0);
+    if (latChart) {
+      latChart.data.labels = labels; latChart.data.datasets[0].data = data; latChart.update();
+    } else {
+      latChart = new Chart(document.getElementById('latency'), {
+        type: 'line',
+        data: { labels, datasets: [{ label: 'latency (ms)', data, borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.1)', fill: true, tension: 0.3, pointRadius: 2 }] },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false }, ticks: { font: { size: 9 }, maxTicksLimit: 8 } },
+            y: { beginAtZero: true, grid: { color: '#f3f4f6' }, ticks: { font: { size: 10 }, callback: (v) => v + 'ms' } }
+          }
+        }
+      });
+    }
+
+    document.getElementById('updated').textContent = `Polled MCP /api/debug · ${d.generated_at}`;
+  }
+
+  load();
+  setInterval(load, 15000);
 </script>
 </body>
 </html>
