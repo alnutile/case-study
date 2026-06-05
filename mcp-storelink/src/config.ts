@@ -40,7 +40,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     storelinkTimeoutMs: num(env.STORELINK_TIMEOUT_MS, 5000),
     transport,
     httpHost: env.MCP_HTTP_HOST ?? "0.0.0.0",
-    httpPort: num(env.MCP_HTTP_PORT, 8080),
+    // Prefer $PORT (Railway/Cloud Run inject it), then MCP_HTTP_PORT, then 8080.
+    httpPort: num(env.PORT ?? env.MCP_HTTP_PORT, 8080),
     auditDbPath: env.AUDIT_DB_PATH ?? "./data/audit.db",
     korralKeysInline: env.KORRAL_KEYS,
     korralKeysDir: env.KORRAL_KEYS_DIR,
