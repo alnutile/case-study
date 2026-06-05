@@ -9,7 +9,8 @@
     "start": "tsx src/index.ts",
     "build": "tsc",
     "serve": "node dist/index.js",
-    "smoke": "tsx scripts/smoke.ts"
+    "smoke": "tsx scripts/smoke.ts",
+    "cloud-smoke": "tsx scripts/cloud-smoke.ts"
   },
   "keywords": [
     "mcp",
