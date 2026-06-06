@@ -8,6 +8,18 @@ A customer-deployable MCP server that puts a Duvo agent on top of Korral's Store
 
 The goal was not to ship a polished SaaS. It was to ship the smallest realistic version of what would actually go into Korral's GCP tenancy on day one, with the operational story (secrets, observability, deploy) honest enough that their IT team would sign off.
 
+## Rough pilot ROI
+
+Back-of-the-envelope so the numbers aren't abstract. Real Korral data would sharpen this in the first two weeks.
+
+Manual baseline: 180 stores at roughly 30 buyer SKU/store checks per day, ~3 minutes each. That's around **270 buyer-hours per day across the chain**, just for the detective work the agent now does in seconds.
+
+Even at **50% automation** in year one (the rest held for buyer review, which is the right posture early), that's **~135 hours/day reallocated**. At **€40/hr fully loaded**, that's **~€5,400/day, or ~€1.4M/year in labor alone**, before any lost-sale recovery from prevented stockouts.
+
+Lost-sale recovery is the bigger lever once the model and buyer trust mature. A single prevented stockout on a fast-mover like Madeta butter is double-digit euros per store-day. At chain scale that compounds quickly.
+
+The point isn't the precise number. The point is that the math works at the back-of-envelope level, which is the bar for a pilot to be worth doing.
+
 ## Links
 
 | Component | URL | Status |
